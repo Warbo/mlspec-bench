@@ -13,7 +13,10 @@ maintainer:          chriswarbo@gmail.com
 -- copyright:           
 category:            Testing
 build-type:          Simple
--- extra-source-files:  
+data-files:          data/list-extras.formatted.1
+                   , data/list-extras.formatted.2
+                   , data/list-extras.formatted.11
+
 cabal-version:       >=1.10
 
 executable mlspec-bench
@@ -21,5 +24,11 @@ executable mlspec-bench
   -- other-modules:       
   -- other-extensions:    
   build-depends:       base >=4.8 && <4.9
+                     , criterion
+                     , process
+                     , directory
+                     , mlspec
+                     , bytestring
+                     , process-extras
   hs-source-dirs:      src
   default-language:    Haskell2010
