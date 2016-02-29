@@ -42,7 +42,7 @@ run n (stdin, sout, serr) = do
 
 -- Test data
 
-clusters = [1, 2, 11]  -- See data-files in mlspec-bench.cabal
+clusters = [1, 2] --, 11]  -- See data-files in mlspec-bench.cabal
 
 clusterFile :: Int -> IO FilePath
 clusterFile n = getDataFileName ("data/list-extras.formatted." ++ show n)

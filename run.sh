@@ -13,7 +13,7 @@ mkdir -p "$BENCH_DIR/outputs" || {
 echo "Results will be written to '$BENCH_DIR/outputs'" >> /dev/stderr
 export BENCH_DIR
 
-ENVIRONMENT_PACKAGES="list-extras" build-env cabal -v0 run
+ENVIRONMENT_PACKAGES="list-extras" build-env cabal -v0 run -- --template json --output "$BENCH_DIR/outputs/charts.json"
 
 [[ -z "$DELETE_BENCH_OUTPUT" ]] || {
     echo "Deleting output directory '$BENCH_DIR'" >> /dev/stderr
