@@ -4,6 +4,7 @@ module Main where
 
 import Control.Exception
 import Criterion.Main
+import Data.Char
 import Data.List
 import Paths_mlspec_bench
 import System.Directory
@@ -14,22 +15,24 @@ import System.Process
 
 -- Register benchmarks
 
-main = defaultMain [
-    bgroup "MLSpec" (map mlspecBench clusters)
-  ]
+main = do cmd   <- getEnv "BENCHMARK_COMMAND"
+          input <- getContents
+          defaultMain [
+              bgroup "command" [mkBench cmd input]
+            ]
 
-mlspecBench :: Int -> Benchmark
-mlspecBench n = Criterion.Main.env (inputs n) go
-  where go stdin = bench (show n ++ " cluster(s)")
-                         (nfIO (run n stdin))
+mkBench :: String -> String -> Benchmark
+mkBench cmd stdin = Criterion.Main.env (inputs cmd stdin) go
+  where go stdio = bench ("Running " ++ show cmd)
+                         (nfIO (run cmd stdio))
 
 -- Functions to benchmark
 
-run :: Int -> Input -> IO String
-run n (stdin, sout, serr) = do
+run :: String -> Input -> IO String
+run cmd (stdin, sout, serr) = do
   stdout <- openFile sout AppendMode
   stderr <- openFile serr AppendMode
-  (c, o, e) <- readCreateProcessWithExitCode cmd stdin
+  (c, o, e) <- readCreateProcessWithExitCode cmd' stdin
   hPutStr stdout ("\n-----\n" ++ o)
   hPutStr stderr ("\n-----\n" ++ e)
   hClose stdout
@@ -38,7 +41,7 @@ run n (stdin, sout, serr) = do
     ExitSuccess   -> return ()
     ExitFailure i -> error ("explore-theories exited with code " ++ show i)
   return o
-  where cmd = proc "explore-theories" []
+  where cmd' = proc cmd []
 
 -- Test data
 
@@ -50,18 +53,19 @@ clusterFile n = getDataFileName ("data/list-extras.formatted." ++ show n)
 type Deferred a = () -> a
 type Input = (String, FilePath, FilePath)
 
-inputs :: Int -> IO Input
-inputs n = do stdin            <- clusterFile n >>= readFile
-              (stdout, stderr) <- outputPaths n
-              return (stdin, stdout, stderr)
+inputs :: String -> String -> IO Input
+inputs cmd stdin = do (stdout, stderr) <- outputPaths cmd
+                      return (stdin, stdout, stderr)
 
-outputPaths n = do Just d <- lookupEnv "BENCH_DIR"
-                   let out = open d "stdout"
-                       err = open d "stderr"
-                   return (out, err)
-  where open d x = d ++ "/outputs/" ++ show n ++ "." ++ x
+outputPaths cmd = do Just d <- lookupEnv "BENCH_DIR"
+                     let out = open d "stdout"
+                         err = open d "stderr"
+                     return (out, err)
+  where open d x = d ++ "/outputs/" ++ hash cmd ++ "." ++ x
 
 -- Helpers
+
+hash = map (\c -> if isAscii c && isAlphaNum c then c else '_')
 
 err :: (Show a) => a -> IO ()
 err = hPutStrLn stderr . show
