@@ -39,7 +39,7 @@ run cmd (stdin, sout, serr) = do
   hClose stderr
   case c of
     ExitSuccess   -> return ()
-    ExitFailure i -> error ("explore-theories exited with code " ++ show i)
+    ExitFailure i -> error ("'" ++ cmd ++ "' exited with code " ++ show i)
   return o
   where cmd' = proc cmd []
 
