@@ -6,9 +6,10 @@ import Test.Tasty (defaultMain, testGroup)
 import Test.Tasty.QuickCheck
 
 main = defaultMain $ testGroup "All tests" [
-    testProperty "Command gets set" cmdIsSet
+      testProperty "Handle no args" readArgsNothing
+    , testProperty "Handle args"    readArgsJust
   ]
 
-cmdIsSet s = case cmdspec (mkCmd s) of
-  RawCommand c _ -> c === s
-  _              -> error "Was expecting a RawCommand"
+readArgsNothing = readArgs Nothing === []
+
+readArgsJust xs = readArgs (Just (show xs)) === xs
