@@ -16,7 +16,9 @@ import System.Process
 -- Register benchmarks
 
 benchMain = do cmd   <- getEnv "BENCHMARK_COMMAND"
+               hPutStr stderr ("Got command " ++ show cmd)
                args  <- fmap readArgs (lookupEnv "BENCHMARK_ARGS")
+               hPutStr stderr ("Got args " ++ show args)
                input <- getContents
                defaultMain [
                    bgroup "command" [mkBench (proc cmd args) input]
